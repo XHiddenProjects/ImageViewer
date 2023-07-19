@@ -63,7 +63,53 @@ These are tools that changes on how you can have image be preformed
 ### viewer
 
 Loads up the viewer with different base:
-* Download
-* Copy
-* Clone
-* Open
+* Download - Downloads the image
+* Copy - Copies the URL for the image
+* Clone - Copies the image to clipboard
+* Open - Opens the image in a new tab
+
+To load use this code:
+```js
+iv.viewer({static:false,base:{download:true, open:true, copy:true, clone:true},animate:''});
+/*
+* static(boolean) - depends if user can only press the "X" button only or on-screen close
+* base.download(boolean) - displays DOWNLOAD button
+* base.open(boolean) - displays OPEN button
+* base.copy(boolean) - displays COPY button
+* base.clone(boolean) - displays CLONE button
+* animate(boolean) - Allows "", "curtain", or "slideshow"
+*/
+```
+
+### filters
+To load CSS filters you musts run this code:
+```js
+iv.filters({viewID},{FilterList});
+```
+`viewID` is each image the is loaded starting a _1_
+
+**Supported Filter List:**
+* grayscale
+* blur
+* brightness
+* contrast
+* dropShadow
+* hueRotate
+* invert
+* opacity
+* saturate
+* sepia
+
+### resize
+
+To allow user-resize type:
+```js
+iv.resize({viewID});//loads a box that is going to be used on, users can resize it, for only on their end.
+```
+
+### crop
+
+To allow user-crop type:
+```js
+iv.crop({viewID});//loads a box that is going to be used on, users can crop it, for only on their end.
+```
