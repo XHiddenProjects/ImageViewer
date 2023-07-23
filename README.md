@@ -13,10 +13,15 @@ To load up the software you must have a setup in `HTML` in this following code.
 </div>
 ```
 
+You would also require _fontawesome pro v6+_, I will NOT being putting up fontawesome's icons on here due to cause of **DMCA takedown.**
+
+
 the current _viewtype_ are:
 * gallery - loades multiple images in flexable format.
 * stack - loads multiple images in a book-stacked format.
 * frame - loads only one image in landscape/portrait format.
+* card - loads and images as a card format.
+* video - loads a custom made look for video viewing.
 
 --more in feature updates--
 ***
@@ -54,6 +59,18 @@ You must have the `viewType` set to  _frame_ then load it:
 iv.frame({type:'landscape',radius:'5px',desc:{display:false,viewer:false}});//loads frame(with border-radius of 5px with no description and viewer, at display of landscape/portrait)
 ```
 
+### loading card
+You must have the `viewType` set to  _card_ then load it:
+```js
+iv.card({desc:{display:true,viewer:false}});//loads a card(being displayed and not viewable)
+```
+
+### loading video
+You must have the `viewType` set to  _video_ then load it:
+```js
+iv.video({desc:{display:true, viewer:false},poster:[],progressFill:['cyan'],skipRate:[5]});//loads a vide(display of true and no viewing, no poster on the first video, with a cyan fill on the progress on the first video, and the has a skipRate of 5 seconds on the first video).
+```
+
 ***
 
 ## Tools
@@ -70,8 +87,9 @@ Loads up the viewer with different base:
 
 To load use this code:
 ```js
-iv.viewer({static:false,base:{download:true, open:true, copy:true, clone:true},animate:''});
+iv.viewer({viewAs:'video',static:false,base:{download:true, open:true, copy:true, clone:true},animate:''});
 /*
+* viewAs(string) - depends if your are viewing as a video/image only
 * static(boolean) - depends if user can only press the "X" button only or on-screen close
 * base.download(boolean) - displays DOWNLOAD button
 * base.open(boolean) - displays OPEN button
