@@ -68,7 +68,7 @@ iv.card({desc:{display:true,viewer:false}});//loads a card(being displayed and n
 ### loading video
 You must have the `viewType` set to  _video_ then load it:
 ```js
-iv.video({desc:{display:true, viewer:false},poster:[],progressFill:['cyan'],skipRate:[5]});//loads a video(display of true and no viewing, no poster on the first video, with a cyan fill on the progress on the first video, and the has a skipRate of 5 seconds on the first video).
+iv.video({desc:{display:true},poster:[],progressFill:['cyan'],skipRate:[5],subtitles:{lang:{en:["{src-to-transcript}","English"]},default:"off"}});//loads a video(display of true and no viewing, no poster on the first video, with a cyan fill on the progress on the first video, and the has a skipRate of 5 seconds on the first video) with subtitle ONLY english set off.
 ```
 
 ***
