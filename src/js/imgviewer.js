@@ -144,7 +144,7 @@ class ImgViewer{
 				 s.desc.viewer ? '' : gal[a].classList.add('noView');
 				 gal[a].classList.add(s.type);
 				 gal[a].style.borderRadius = s.radius;
-				 let img = gal[a].querySelectorAll('img');
+				 let img = gal[a].querySelectorAll('img, video');
 				 if(img.length>1||img.length<=0){
 					 console.error('You have too many/too less images, REQUIRED MAX 1');
 					 return false;
@@ -209,17 +209,31 @@ class ImgViewer{
 		
 		let gal = document.querySelectorAll('.imgViewer-container.loaded');
 		for(let a=0;a<gal.length;a++){
+			s.desc.viewer = false;
 			if(gal[a].getAttribute('view').toLowerCase()==='video'){
 				!s.desc.display||s.desc.viewer ? gal[a].classList.add('noCaption') : gal[a].classList.add('caption');
 				 s.desc.viewer ? '' : gal[a].classList.add('noView');
 				let img = gal[a].querySelectorAll('video');
 				for(let b=0;b<img.length;b++){
 					s.poster[b]!==''&&s.poster.length>0 ? img[b].poster = s.poster[b] : '';
+					let ccItems = [];
 					img[b].setAttribute('ondblclick','setFull(this.parentElement.querySelector(".fullscreen"),70)')
 					img[b].tabIndex = '1';
 					img[b].setAttribute('onkeydown','setFull(this.parentElement.querySelector(".fullscreen"), event);setMute(this.parentElement.querySelector(".mute"),event);actVid(this.parentElement.querySelector(".play-pause-btn"), event);addSec(this, '+(typeof s.skipRate!=='undefined' ? (s.skipRate.length==0||s.skipRate[b]==0 ? 5 : s.skipRate[b]) : 5)+', event);hideContent(this);');
 					img[b].setAttribute('onclick','actVid(this.parentElement.querySelector(".play-pause-btn"), 32);hideContent(this);');
 					img[b].setAttribute('oncontextmenu','showContent(this, event);return false;');
+					img[b].setAttribute('onerror','displayPlayBackErr(this);');
+					if(s.subtitles){
+							let obj = Object.keys(s.subtitles.lang);
+							let objV = Object.values(s.subtitles.lang);
+							if(obj.length>0){
+								for(let i=0;i<obj.length;i++){
+									img[b].innerHTML+='<track'+(s.subtitles.default.toLowerCase()===obj[i].toLowerCase() ? ' default ' : ' ')+'src="'+objV[i][0]+'" kind="subtitles" srclang="'+obj[i].toLowerCase()+'" label="'+objV[i][1]+'"/>';
+									if(ccItems.indexOf('<option value="off">Off</option>')){ccItems.push('<option value="off">Off</option>')};
+									ccItems.push('<option'+(s.subtitles.default.toLowerCase()===obj[i].toLowerCase() ? ' selected="selected"' : '')+' value="'+obj[i]+'">'+objV[i][1]+'</option>');
+								}
+							}
+						}
 					let d = document.createElement('div');
 						d.innerHTML = (s.desc.display&&!s.desc.viewer ? img[b].outerHTML : img[b].outerHTML);
 						d.innerHTML += (!s.desc.viewer ? '<div class="loading-container"><div class="loading-circle"></div></div><div class="video-player" onclick="hideContent(this);" tabindex="0">'+
@@ -231,17 +245,27 @@ class ImgViewer{
 						'<input class="volume" type="range" oninput="changeVidVol(this)" min="0" max="1" step="0.01" value="1"/></div>'+
 						'<div class="mute" toggle-stat="normal" onclick="setMute(this, 77)"><i class="fas fa-volume"></i></div>'+
 						'<div class="fullscreen" toggle-stat="normal" onclick="setFull(this, 70)"><i class="fa-solid fa-maximize"></i></div>'+
+						'<div class="cc" class="ccToggle" toggle-stat="hidden" onclick="toggleCC(this,\'en\');"><i class="fa-solid fa-closed-captioning"></i></div>'+
+						'<div class="settings" class="settings"><button onclick="toggleSettings(this);"><i class="fa-solid fa-gear"></i></button><ul class="setList hidden">'+
+						'<li><i class="fa-solid fa-closed-captioning"></i> <select class="ccOption" onchange="changeCC(this.parentElement.parentElement.parentElement, this.value)">'+ccItems.toString()+'</select></li>'+
+						'<li><i class="fa-solid fa-sliders-up"></i> <select class="PlaybackSpeed" onchange="changePlaySpeed(this.parentElement.parentElement.parentElement, this.value)"><option value="0.25">0.25</option><option value="0.50">0.50</option><option value="0.75">0.75</option><option value="1" selected="selected">Normal</option><option value="1.25">1.25</option><option value="1.50">1.50</option><option value="1.75">1.75</option><option value="2">2</option></select></li>'+
+						'</ul></div>'+
+						'<div class="theaterMode" onclick="theaterMode(this)"><i class="fa-regular fa-rectangle-wide"></i></div>'+
 						'<div class="time">'+
 						'<span class="current">00:00</span>&nbsp;/&nbsp;<span class="duration">00:00</span>'+
 						'</div></div>'+
 						'<div class="videoContext">'+
 						'<ul>'+
 						'<li onclick="loop(this)"><span class="isActive"></span> <i class="fa-solid fa-arrows-rotate"></i> Loop</li>'+
+						'<li onclick="pip(this)"><span class="isActive"></span> <i class="fa-solid fa-bring-forward fa-rotate-180"></i> Pictue-in-Picture</li>'+
 						'</ul>'+
-						'</div>': '');
+						'</div>'+
+						'<div class="errorMsg"><div class="container"><h1><i class="fa-solid fa-triangle-exclamation fa-beat" style="color: #ff0000;"></i> Video Playback error</h1><p>There seems to be a problem with the video, try again later!</p></div></div>': '');
 						d.classList.add('view');
 						d.setAttribute('viewData',b+1);
+						
 						gal[a].replaceChild(d,img[b]);
+						
 				}
 			}
 		}
@@ -327,7 +351,7 @@ class ImgViewer{
 		}
 		let t = document.querySelector('.imgViewer-container.loaded[view="frame"] [viewdata="'+parseInt(data)+'"]');
 		if(t){
-			let iD = t.querySelector('img').getBoundingClientRect();
+			let iD = t.querySelector('img, video').getBoundingClientRect();
 			let rec = document.createElement('div');
 				rec.className = 'rtangle';
 				rec.style.width = iD.width+'px';
@@ -343,7 +367,7 @@ class ImgViewer{
 		}
 		let t = document.querySelector('.imgViewer-container.loaded[view="frame"] [viewdata="'+parseInt(data)+'"]');
 		if(t){
-			let iD = t.querySelector('img').getBoundingClientRect();
+			let iD = t.querySelector('img, video').getBoundingClientRect();
 			let rec = document.createElement('div');
 				rec.className = 'ctangle';
 				rec.style.width = iD.width + 'px';
@@ -502,8 +526,8 @@ function resizeGrayBox(box, mouse){
 		setTimeout(function(){
 			resizing=false;
 			let iD = box.getBoundingClientRect();
-			box.parentElement.querySelector('img').style.width = iD.width+'px';
-			box.parentElement.querySelector('img').style.height = iD.height+'px';
+			box.parentElement.querySelector('img, video').style.width = iD.width+'px';
+			box.parentElement.querySelector('img, video').style.height = iD.height+'px';
 			killViews('.rtangle');			
 		},100);	
 	});
@@ -538,7 +562,7 @@ function cropGrayBox(box, mouse){
 		setTimeout(function(){
 			cropping=false;
 			let iD = box.getBoundingClientRect();
-			box.parentElement.querySelector('img').style.clipPath = 'inset('+(dT-iD.top)+'px '+(dR-iD.right)+'px '+(dB-iD.bottom)+'px '+(dL-iD.left)+'px)';
+			box.parentElement.querySelector('img, video').style.clipPath = 'inset('+(dT-iD.top)+'px '+(dR-iD.right)+'px '+(dB-iD.bottom)+'px '+(dL-iD.left)+'px)';
 			box.parentElement.style.clipPath = 'inset('+(dT-iD.top)+'px '+(dR-iD.right)+'px '+(dB-iD.bottom)+'px '+(dL-iD.left)+'px)';
 			box.parentElement.classList.add('noBorder');
 			killViews('.ctangle');
@@ -696,6 +720,7 @@ function addSec(n, s, e){
 		n.currentTime = n.currentTime - parseInt(s);
 	}
 }
+var resetSubtitle = 0
 function actVid(n, e){
 	if(e.keyCode==32||e.which==32||e==32&&n.parentElement.parentElement.parentElement.querySelector('.videoContext').style.display==='none'){
 		let vid = n.parentElement.parentElement.parentElement.querySelector('video');
@@ -704,8 +729,14 @@ function actVid(n, e){
 		let currTime = n.parentElement.parentElement.parentElement.querySelector('.current');
 		let progress = n.parentElement.parentElement.parentElement.querySelector('.video-progress');
 		let progressFill = n.parentElement.parentElement.parentElement.querySelector('.video-progress-filled');
-		
-		
+		//reset to off
+		if(resetSubtitle<1){
+			let tracks = n.parentElement.parentElement.parentElement.querySelectorAll('track');
+			for(let a=0;a<tracks.length;a++){
+				tracks[a].parentElement.textTracks[a].mode = 'hidden';
+			}
+			resetSubtitle = 1;
+		}
 		progress.addEventListener('click', (e)=>{
 			const progressTime = (e.offsetX / progress.offsetWidth) * vid.duration;
 			vid.currentTime = progressTime;
@@ -792,8 +823,8 @@ function setMute(n, e){
 function showContent(n, e){
 	let vC = n.parentElement.querySelector('.videoContext');
 	vC.style.display = 'block';
-	vC.style.top = e.clientY+'px';
-	vC.style.left = e.clientX+'px';
+	vC.style.top = (e.offsetY)+'px';
+	vC.style.left = (e.offsetX)+'px';
 }
 function hideContent(n){
 	let vC = n.parentElement.querySelector('.videoContext');
@@ -810,4 +841,76 @@ function loop(n){
 		n.querySelector('.isActive').innerHTML = '<i class="fa-solid fa-check"></i>';
 		vid.loop = true;
 	}
+}
+function pip(n){
+	let con = n.parentElement.parentElement.parentElement.parentElement;
+	if(con.className.match('pip')){
+		n.querySelector('.isActive').innerHTML = '';
+		con.classList.toggle('pip');
+	}else{
+		n.querySelector('.isActive').innerHTML = '<i class="fa-solid fa-check"></i>';
+		con.classList.toggle('pip');
+	}
+}
+function displayPlayBackErr(n){
+	if(n.parentElement!==null){
+		n.parentElement.querySelector('.errorMsg').style.display='block';
+		return false;
+	}
+}
+function changeCC(n, c){
+	let tracks = n.parentElement.parentElement.querySelectorAll('track');
+	let ccI = n.parentElement.parentElement.querySelector('.cc');
+	for(let a=0;a<tracks.length;a++){
+		if(c.toLowerCase()==='off'){
+			tracks[a].parentElement.textTracks[a].mode = 'hidden';
+			ccI.classList.remove('active');
+			ccI.setAttribute('toggle-stat', 'hidden');
+		}else{
+			if(tracks[a].srclang.toLowerCase()===c.toLowerCase()){
+				tracks[a].parentElement.textTracks[a].mode = 'showing';
+				ccI.classList.contains('active') ? ccI.classList.replace('active', 'active') : ccI.classList.add('active');
+				ccI.setAttribute('toggle-stat', 'showing');
+			}else{
+				tracks[a].parentElement.textTracks[a].mode = 'hidden';
+				ccI.classList.contains('active') ? ccI.classList.replace('active', 'active') : ccI.classList.add('active');
+				ccI.setAttribute('toggle-stat', 'showing');
+			}
+		}
+	}
+}
+function changePlaySpeed(n, c){
+	let vid = n.parentElement.parentElement.parentElement.querySelector('video');
+	vid.playbackRate = parseFloat(c);
+}
+function toggleCC(n, c){
+	let tracks = n.parentElement.parentElement.parentElement.querySelectorAll('track');
+	switch(n.getAttribute('toggle-stat')){
+		case 'hidden':
+			for(let i=0;i<tracks.length;i++){
+				if(tracks[i].srclang.toLowerCase()===c){
+					tracks[i].parentElement.textTracks[i].mode = 'showing';
+					
+				}else{
+					tracks[i].parentElement.textTracks[i].mode = 'hidden';
+				}
+			}
+			n.classList.toggle('active');
+			n.setAttribute('toggle-stat', 'showing');
+		break;
+		case 'showing':
+			for(let i=0;i<tracks.length;i++){
+				tracks[i].parentElement.textTracks[i].mode  = 'hidden';
+			}
+		n.classList.toggle('active');
+		n.setAttribute('toggle-stat', 'hidden');
+		break;
+	}
+}
+function toggleSettings(n){
+	n.parentElement.classList.toggle('focus');
+	n.parentElement.querySelector('.setList').classList.toggle('hidden');
+}
+function theaterMode(n){
+n.parentElement.parentElement.parentElement.classList.toggle('theater');
 }
