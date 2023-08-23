@@ -208,6 +208,7 @@ class ImgViewer{
 		}
 		
 		let gal = document.querySelectorAll('.imgViewer-container.loaded');
+		let disabled = false;
 		for(let a=0;a<gal.length;a++){
 			s.desc.viewer = false;
 			if(gal[a].getAttribute('view').toLowerCase()==='video'){
@@ -223,7 +224,7 @@ class ImgViewer{
 					img[b].setAttribute('onclick','actVid(this.parentElement.querySelector(".play-pause-btn"), 32);hideContent(this);');
 					img[b].setAttribute('oncontextmenu','showContent(this, event);return false;');
 					img[b].setAttribute('onerror','displayPlayBackErr(this);');
-					if(s.subtitles){
+					if(s.subtitles&&s.subtitles.lang){
 							let obj = Object.keys(s.subtitles.lang);
 							let objV = Object.values(s.subtitles.lang);
 							if(obj.length>0){
@@ -233,6 +234,9 @@ class ImgViewer{
 									ccItems.push('<option'+(s.subtitles.default.toLowerCase()===obj[i].toLowerCase() ? ' selected="selected"' : '')+' value="'+obj[i]+'">'+objV[i][1]+'</option>');
 								}
 							}
+						}else{
+							disabled = true;
+							ccItems.push('<option value="">Off</option>')
 						}
 					let d = document.createElement('div');
 						d.innerHTML = (s.desc.display&&!s.desc.viewer ? img[b].outerHTML : img[b].outerHTML);
@@ -245,7 +249,7 @@ class ImgViewer{
 						'<input class="volume" type="range" oninput="changeVidVol(this)" min="0" max="1" step="0.01" value="1"/></div>'+
 						'<div class="mute" toggle-stat="normal" onclick="setMute(this, 77)"><i class="fas fa-volume"></i></div>'+
 						'<div class="fullscreen" toggle-stat="normal" onclick="setFull(this, 70)"><i class="fa-solid fa-maximize"></i></div>'+
-						'<div class="cc" class="ccToggle" toggle-stat="hidden" onclick="toggleCC(this,\'en\');"><i class="fa-solid fa-closed-captioning"></i></div>'+
+						'<div class="cc'+(disabled ? ' disabled' : '')+'" class="ccToggle" toggle-stat="hidden" '+(disabled ? '' : 'onclick="toggleCC(this,\'en\');"')+'><i class="fa-solid fa-closed-captioning"></i></div>'+
 						'<div class="settings" class="settings"><button onclick="toggleSettings(this);"><i class="fa-solid fa-gear"></i></button><ul class="setList hidden">'+
 						'<li><i class="fa-solid fa-closed-captioning"></i> <select class="ccOption" onchange="changeCC(this.parentElement.parentElement.parentElement, this.value)">'+ccItems.toString()+'</select></li>'+
 						'<li><i class="fa-solid fa-sliders-up"></i> <select class="PlaybackSpeed" onchange="changePlaySpeed(this.parentElement.parentElement.parentElement, this.value)"><option value="0.25">0.25</option><option value="0.50">0.50</option><option value="0.75">0.75</option><option value="1" selected="selected">Normal</option><option value="1.25">1.25</option><option value="1.50">1.50</option><option value="1.75">1.75</option><option value="2">2</option></select></li>'+
